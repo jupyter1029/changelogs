@@ -6,7 +6,11 @@ on:
       lastVersion:
         description: "Last Version"
         required: true
-        default: "1.0.10"
+        default: "6.1.5"
+
+env:
+  REPO_OWNER: jupyter-server
+  REPO_NAME: jupyter_server
 
 jobs:
   job1:
@@ -14,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        repository: ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
     - name: Get Ruby
       uses: actions/setup-ruby@v1
     - name: Install github changelog generator
@@ -21,8 +27,8 @@ jobs:
         gem install github_changelog_generator
     - name: Generate ChangeLog
       run: |
-        github_changelog_generator -u jupyter-server \
-        -p jupyter_server \
+        github_changelog_generator -u ${{ env.REPO_OWNER }} \
+        -p ${{ env.REPO_NAME }} \
         --token ${{ secrets.GITHUB_TOKEN }} \
         --no-issues \
         --since-tag ${{ github.event.inputs.lastVersion }} \
