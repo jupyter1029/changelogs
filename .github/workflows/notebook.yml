@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ REPO_OWNER }}/${{ REPO_NAME }}
+        repository: $REPO_OWNER/$REPO_NAME
     - name: Get Ruby
       uses: actions/setup-ruby@v1
     - name: Install github changelog generator
@@ -27,8 +27,8 @@ jobs:
         gem install github_changelog_generator
     - name: Generate ChangeLog
       run: |
-        github_changelog_generator -u ${{ REPO_NAME }} \
-        -p ${{ REPO_NAME }} \
+        github_changelog_generator -u $REPO_NAME \
+        -p $REPO_NAME \
         --token ${{ secrets.GITHUB_TOKEN }} \
         --no-issues \
         --since-tag ${{ github.event.inputs.lastVersion }} \
