@@ -1,0 +1,43 @@
+name: Notebook
+
+on:
+  workflow_dispatch:
+    inputs:
+      lastVersion:
+        description: "Last Version"
+        required: true
+        default: "6.1.5"
+
+env:
+  REPO_OWNER: jupyter
+  REPO_NAME: notebook
+
+jobs:
+  job1:
+    name: Testing this job
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: ${{ REPO_OWNER }}/${{ REPO_NAME }}
+    - name: Get Ruby
+      uses: actions/setup-ruby@v1
+    - name: Install github changelog generator
+      run: |
+        gem install github_changelog_generator
+    - name: Generate ChangeLog
+      run: |
+        github_changelog_generator -u ${{ REPO_NAME }} \
+        -p ${{ REPO_NAME }} \
+        --token ${{ secrets.GITHUB_TOKEN }} \
+        --no-issues \
+        --since-tag ${{ github.event.inputs.lastVersion }} \
+        --output changelog.md
+    - name: Get current date
+      id: date
+      run: echo "current_date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+    - name: Upload Changelog to artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.inputs.lastVersion }}-${{ env.current_date }}
+        path: changelog.md
