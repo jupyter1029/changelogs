@@ -27,7 +27,7 @@ jobs:
         gem install github_changelog_generator
     - name: Generate ChangeLog
       run: |
-        github_changelog_generator -u ${{ env.REPO_NAME }} \
+        github_changelog_generator -u ${{ env.REPO_OWNER }} \
         -p ${{ env.REPO_NAME }} \
         --token ${{ secrets.GITHUB_TOKEN }} \
         --no-issues \
