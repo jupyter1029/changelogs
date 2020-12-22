@@ -1,0 +1,43 @@
+name: Notebook2
+
+on:
+  workflow_dispatch:
+    inputs:
+      sinceVersion:
+        description: "Since this version"
+        required: true
+      untilVersion:
+        description: "Until this version"
+        required: true
+
+env:
+  REPO_OWNER: jupyter
+  REPO_NAME: notebook
+
+jobs:
+  job1:
+    name: Testing this job
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
+    - name: Install Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.8'
+        architecture: 'x64'
+    - name: Install github-activity tool from Jupyter Book
+      run: |
+        pip install git+https://github.com/choldgraf/github-activity
+    - name: Generate ChangeLog
+      run: |
+        github-activity ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }} -s github.event.inputs.sinceVersion -u github.event.inputs.untilVersion -o changelog.md
+    - name: Get current date
+      id: date
+      run: echo "current_date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+    - name: Upload Changelog to artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.inputs.lastVersion }}-${{ env.current_date }}
+        path: changelog.md
