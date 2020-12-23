@@ -3,10 +3,12 @@ name: Jupyter Server
 on:
   workflow_dispatch:
     inputs:
-      lastVersion:
-        description: "Last Version"
+      sinceVersion:
+        description: "Since this date or ref"
         required: true
-        default: "6.1.5"
+      untilVersion:
+        description: "Until this date or ref"
+        required: true
 
 env:
   REPO_OWNER: jupyter-server
@@ -20,19 +22,17 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
-    - name: Get Ruby
-      uses: actions/setup-ruby@v1
-    - name: Install github changelog generator
+    - name: Install Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.8'
+        architecture: 'x64'
+    - name: Install github-activity tool from Jupyter Book
       run: |
-        gem install github_changelog_generator
+        pip install git+https://github.com/choldgraf/github-activity
     - name: Generate ChangeLog
       run: |
-        github_changelog_generator -u ${{ env.REPO_OWNER }} \
-        -p ${{ env.REPO_NAME }} \
-        --token ${{ secrets.GITHUB_TOKEN }} \
-        --no-issues \
-        --since-tag ${{ github.event.inputs.lastVersion }} \
-        --output changelog.md
+        github-activity ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }} -s github.event.inputs.sinceVersion -u github.event.inputs.untilVersion -o changelog.md
     - name: Get current date
       id: date
       run: echo "current_date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
